@@ -2,203 +2,217 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Protocol v8.5 Dev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol v8.6 - Final Stable</title>
     <style>
-        :root { --accent: #00e5ff; --bg: #000; --text: #e0e0e0; --dim: #0a0a0a; }
-        body { 
-            font-family: 'Inter', system-ui, sans-serif; 
-            background: var(--bg); color: var(--text); 
-            padding: 15px; text-align: center; margin: 0;
-            transition: all 0.3s ease;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: #e0e0e0; padding: 10px; text-align: center; margin: 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; max-width: 1200px; margin: 15px auto; }
+        .slot { background: #0f0f0f; padding: 12px; border-radius: 12px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; min-height: 120px; transition: 0.3s; }
+        .label { font-size: 0.55rem; color: #444; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px; }
+        .res-box { font-size: 1.2rem; font-weight: bold; color: #00e5ff; margin-bottom: 8px; }
         
-        /* Branding Header */
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .logo-box {
-            width: 30px; height: 30px;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-        }
-        .brand-text { font-size: 0.8rem; letter-spacing: 3px; font-weight: bold; }
+        .counter-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-top: auto; font-weight: bold; }
+        .counter-btn:active { background: #222; transform: scale(0.98); }
+        .reroll-small { background: #222; color: #555; border: none; font-size: 0.55rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-top: 5px; text-transform: uppercase; }
+        .reroll-small:disabled { color: #111 !important; cursor: not-allowed; }
 
-        body.stealth { --accent: #050505; --text: #080808; --dim: #010101; }
-        body.stealth .history-row { border-bottom: 1px solid #020202; }
-        body.stealth .logo-box { border-color: #050505; color: #050505; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 450px; margin: 15px auto; }
-        .slot { 
-            background: var(--dim); padding: 12px; border-radius: 18px; 
-            border: 1px solid #111; display: flex; flex-direction: column; min-height: 90px;
-        }
-        .label { font-size: 0.5rem; color: #444; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
-        .res-box { font-size: 1.3rem; font-weight: 900; color: var(--accent); }
+        #timer-display { font-size: 12vw; max-font-size: 4rem; font-family: 'Courier New', monospace; margin: 8px 0; color: #ffcc00; }
+        .roll-btn { background: #2979ff; color: white; padding: 16px; font-size: 1.1rem; width: 90%; max-width: 400px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom: 10px;}
+        .done-btn { background: #00c853; color: white; padding: 18px; font-size: 1.4rem; display: none; margin: 15px auto; width: 90%; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
         
-        #timer-display { font-size: 16vw; font-family: monospace; margin: 10px 0; color: #ffcc00; }
-        
-        .roll-btn { 
-            background: #2979ff; color: #fff; border: none; padding: 18px; 
-            border-radius: 14px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer;
-        }
-        .stealth-toggle {
-            position: fixed; top: 10px; right: 10px; background: #111; color: #444;
-            border: 1px solid #222; padding: 8px; border-radius: 12px; font-size: 0.6rem; z-index: 100;
-        }
-        .done-btn { background: #00c853; color: white; border: none; padding: 18px; border-radius: 14px; width: 100%; display: none; margin-top: 10px; font-weight: bold; cursor: pointer;}
-
-        .history-container { margin-top: 30px; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto; }
-        .history-title { font-size: 0.6rem; color: #333; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: flex; justify-content: space-between;}
-        .history-row { 
-            display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr; 
-            padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.7rem; color: #666;
-        }
-        .history-row.header { color: #333; font-weight: bold; border-bottom: 2px solid #111; }
+        #status-msg { font-size: 1.1rem; font-weight: bold; margin-top: 10px; min-height: 30px; color: #888; }
+        .punish-box { color: #d500f9; border: 1px solid #d500f9; background: rgba(213, 0, 249, 0.05); padding: 5px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; }
+        .rejected-style { color: #ff1744; border: 2px solid #ff1744; padding: 15px; border-radius: 8px; background: rgba(255, 23, 68, 0.1); width: 80%; margin: 20px auto; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <button class="stealth-toggle" onclick="toggleStealth()">GHOST MODE</button>
-
-    <header>
-        <div class="logo-box">P</div>
-        <div class="brand-text">PROTOCOL v8.5</div>
-    </header>
+    <h1 style="color: #1a1a1a; font-weight: 300; margin: 10px 0; font-size: 0.7rem; letter-spacing: 5px;">PROTOCOL V8.6</h1>
 
     <div class="grid">
-        <div class="slot"><div class="label">Edges</div><div id="res1" class="res-box">—</div></div>
-        <div class="slot"><div class="label">Method</div><div id="res2" class="res-box">—</div></div>
-        <div class="slot"><div class="label">Outcome</div><div id="res4" class="res-box">—</div></div>
-        <div class="slot"><div class="label">Penalty</div><div id="resPOT" class="res-box">—</div></div>
-        <div class="slot" style="grid-column: span 2;">
+        <div class="slot" id="slot1">
+            <div class="label">Target Edges</div>
+            <div id="res1" class="res-box">—</div>
+            <button id="edgeCountBtn" class="counter-btn" style="display:none" onclick="increment('edge')">LOG EDGE: <span id="edgeVal">0</span></button>
+        </div>
+        <div class="slot" id="slot2">
+            <div class="label">Method</div>
+            <div id="res2" class="res-box">—</div>
+        </div>
+        <div class="slot" id="slot3">
+            <div id="label3" class="label">Requirement</div>
+            <div id="res3" class="res-box">—</div>
+            <button id="prostateCountBtn" class="counter-btn" style="display:none" onclick="increment('prostate')">LOG ORGASM: <span id="prosVal">0</span></button>
+        </div>
+        <div class="slot">
             <div class="label">Fast Until</div>
-            <div id="res5" class="res-box">— DAYS</div>
+            <div id="res5" class="res-box">—</div>
+            <div style="margin-top: auto;">
+                <button class="reroll-small" id="rerollDayBtn" onclick="triggerReroll()">Reroll</button>
+                <div id="reroll-count" style="font-size:0.5rem; color:#444">Left: 4</div>
+            </div>
+        </div>
+        <div class="slot" id="slot4">
+            <div class="label">Outcome</div>
+            <div id="res4" class="res-box">—</div>
+        </div>
+        <div class="slot" id="slotPOT">
+            <div class="label">End Enforcement</div>
+            <div id="resPOT" class="res-box">—</div>
+            <div id="punishDetails" class="punish-box" style="display:none"></div>
         </div>
     </div>
 
-    <button class="roll-btn" id="startBtn" onclick="startSession()">GENERATE</button>
-    <div id="timer-display">00:00</div>
-    <button class="done-btn" id="doneBtn" onclick="finishSession()">REPORT FINISH</button>
+    <button class="roll-btn" id="startBtn" onclick="startSession()">GENERATE SESSION</button>
+    <div id="timer-display">00:00:00</div>
+    <button id="doneBtn" class="done-btn" onclick="finishSession()">I HAVE FINISHED</button>
     
-    <div id="status-msg" style="margin-top: 10px; font-size: 0.8rem; color: #555;"></div>
-
-    <div class="history-container">
-        <div class="history-title">
-            <span>Recent Sessions</span>
-            <span onclick="clearHistory()" style="cursor:pointer; color: #ff1744;">Clear</span>
-        </div>
-        <div class="history-row header">
-            <div>Method</div><div>Result</div><div>Edges</div><div>Days</div>
-        </div>
-        <div id="history-log"></div>
-    </div>
+    <div id="status-msg"></div>
 
 <script>
-    let timerInterval, timeLeft;
+    let timerInterval, timeLeft, sessionActive = false, isRejected = false, rerollsRemaining = 4;
+    let counts = { edge: 0, prostate: 0 };
 
-    function vibrate(p) { if ("vibrate" in navigator) navigator.vibrate(p); }
-    function toggleStealth() { document.body.classList.toggle('stealth'); vibrate(10); }
-
-    function updateHistory(method, outcome, edges, days) {
-        let history = JSON.parse(localStorage.getItem('proto_history') || '[]');
-        history.unshift({ method, outcome, edges, days });
-        if (history.length > 5) history.pop();
-        localStorage.setItem('proto_history', JSON.stringify(history));
-        displayHistory();
+    function rollFastUntil(maxDays) {
+        let pool = [];
+        for (let i = 1; i <= maxDays; i++) {
+            let weight = (i <= 2) ? 40 : 10;
+            for (let j = 0; j < weight; j++) pool.push(i);
+        }
+        document.getElementById('res5').innerText = pool[Math.floor(Math.random() * pool.length)] + " DAYS";
     }
 
-    function displayHistory() {
-        const log = document.getElementById('history-log');
-        const history = JSON.parse(localStorage.getItem('proto_history') || '[]');
-        log.innerHTML = history.map(h => `
-            <div class="history-row">
-                <div>${h.method}</div>
-                <div style="color: ${h.outcome.includes('Cum') ? '#00e5ff' : '#ff1744'}">${h.outcome}</div>
-                <div>${h.edges}</div>
-                <div>${h.days}d</div>
-            </div>
-        `).join('');
+    function triggerReroll() { 
+        if (rerollsRemaining > 0 && !isRejected) {
+            rerollsRemaining--;
+            document.getElementById('reroll-count').innerText = `Left: ${rerollsRemaining}`;
+            rollFastUntil(30); 
+        }
     }
-
-    function clearHistory() { if(confirm("Clear log?")) { localStorage.removeItem('proto_history'); displayHistory(); } }
 
     function startSession() {
-        clearInterval(timerInterval);
+        isRejected = false; sessionActive = false; clearInterval(timerInterval);
+        rerollsRemaining = 4;
+        counts = { edge: 0, prostate: 0 };
+        document.getElementById('edgeVal').innerText = "0";
+        document.getElementById('prosVal').innerText = "0";
+        document.getElementById('reroll-count').innerText = `Left: ${rerollsRemaining}`;
+        document.getElementById('rerollDayBtn').disabled = false;
+        document.getElementById('punishDetails').style.display = "none";
+        document.getElementById('status-msg').innerText = "";
+        document.getElementById('doneBtn').style.display = "none";
+        document.getElementById('edgeCountBtn').style.display = "none";
+        document.getElementById('prostateCountBtn').style.display = "none";
+        document.getElementById('res3').innerText = "---";
+
         const roll = Math.random() * 100;
-        
-        if (roll < 17.5) {
-            vibrate([100, 50, 100]);
-            const d = Math.floor(Math.random() * 4) + 1;
-            document.getElementById('res2').innerText = "DENIED";
-            document.getElementById('res5').innerText = d;
-            document.getElementById('res1').innerText = "0";
-            document.getElementById('res4').innerText = "LOCKOUT";
-            document.getElementById('resPOT').innerText = "---";
-            updateHistory("DENIED", "LOCKOUT", 0, d);
-        } else {
-            vibrate(40);
-            handleAllowed();
+        if (roll < 17.5) { 
+            handleRejection(); 
+        } else { 
+            handleAllowed(); 
         }
+    }
+
+    function handleRejection() {
+        isRejected = true;
+        document.getElementById('res2').innerText = "DENIED";
+        document.getElementById('rerollDayBtn').disabled = true;
+        document.getElementById('status-msg').innerHTML = '<div class="rejected-style">SYSTEM LOCKOUT: ACCESS DENIED</div>';
+        rollFastUntil(4);
+        ['res1','res3','res4','resPOT'].forEach(id => document.getElementById(id).innerText = "---");
     }
 
     function handleAllowed() {
         const mSub = Math.random() * 100;
         let method = "Just Hand";
-        if (mSub < 16) method = "Numbing";
+        
+        // Method Logic
+        if (mSub < 1) method = "Prostate Only";
+        else if (mSub < 6) method = "Just Hand"; 
+        else if (mSub < 16) method = "Numbing Cream";
         else if (mSub < 25) method = "Prostate";
-
-        const edges = Math.floor(Math.random() * (method === "Numbing" ? 3 : 30)) + 1;
-        const outcome = Math.random() < 0.6 ? "To Cum" : "Not To Cum";
-        const days = Math.floor(Math.random() * 30) + 1;
-
-        document.getElementById('res1').innerText = edges;
+        
         document.getElementById('res2').innerText = method;
+
+        // Requirement Logic (Restored Missing Feature)
+        if (method.includes("Prostate")) {
+            const pNeed = Math.floor(Math.random() * 3) + 1;
+            document.getElementById('res3').innerText = pNeed + " ORGASMS";
+            document.getElementById('prostateCountBtn').style.display = "block";
+        } else {
+            document.getElementById('res3').innerText = "STANDARD";
+        }
+
+        // Target Edges
+        let maxE = (method === "Numbing Cream") ? 3 : 30;
+        document.getElementById('res1').innerText = Math.floor(Math.random() * maxE) + 1;
+        document.getElementById('edgeCountBtn').style.display = "block";
+
+        // Outcome Logic
+        const outcome = (mSub >= 1 && mSub < 6) ? "Ruined Orgasm Only" : (Math.random() < 0.6 ? "To Cum" : "Not To Cum");
         document.getElementById('res4').innerText = outcome;
-        document.getElementById('res5').innerText = days;
+        rollFastUntil(30);
 
+        // Enforcement/Penalty Logic
         const potEl = document.getElementById('resPOT');
-        if (outcome === "To Cum") {
+        const detailEl = document.getElementById('punishDetails');
+        
+        if (outcome === "To Cum" || outcome === "Ruined Orgasm Only") {
             const eRoll = Math.random() * 100;
-            if (eRoll < 15 && method !== "Numbing") potEl.innerText = "PUNISH";
-            else if (eRoll < 80) potEl.innerText = (Math.floor(Math.random() * 26) + 5) + " STK";
-            else potEl.innerText = "MERCY";
-        } else { potEl.innerText = "NONE"; }
+            if (eRoll < 15 && method !== "Numbing Cream") {
+                const extra = Math.random() < 0.7 ? "Twice" : "3 Times";
+                potEl.innerText = "PUNISHMENT: " + extra;
+                potEl.style.color = "#d500f9";
+                detailEl.style.display = "block";
+                detailEl.innerHTML = `REST: 5 MIN | WINDOW: ${Math.floor(Math.random() * 6) + 10} MIN`;
+            } else if (eRoll < 80) {
+                let base = Math.floor(Math.random() * 26) + 5;
+                potEl.innerText = base + " STROKES";
+                potEl.style.color = "#ff1744";
+            } else {
+                potEl.innerText = "CLEAN FINISH";
+                potEl.style.color = "#00c853";
+            }
+        } else {
+            potEl.innerText = "NONE";
+            potEl.style.color = "#444";
+        }
 
-        updateHistory(method, outcome, edges, days);
-
+        // Timer Logic
         timeLeft = Math.floor(Math.random() * 2700) + 2700;
+        sessionActive = true;
         document.getElementById('doneBtn').style.display = "block";
         updateTimer();
-        timerInterval = setInterval(() => {
-            timeLeft--; updateTimer();
-            if (timeLeft <= 0) { vibrate([800, 400, 800]); clearInterval(timerInterval); }
+        timerInterval = setInterval(() => { 
+            timeLeft--; 
+            updateTimer(); 
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
+            }
         }, 1000);
     }
 
     function updateTimer() {
-        const m = Math.floor(timeLeft/60), s = timeLeft%60;
-        document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+        const h = Math.floor(timeLeft/3600), m = Math.floor((timeLeft%3600)/60), s = timeLeft%60;
+        document.getElementById('timer-display').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
 
     function finishSession() {
-        vibrate(50);
+        sessionActive = false; 
         clearInterval(timerInterval);
+        document.getElementById('status-msg').innerText = "SESSION LOGGED";
         document.getElementById('doneBtn').style.display = "none";
-        document.getElementById('status-msg').innerText = "SESSION COMPLETE";
+        if ("vibrate" in navigator) navigator.vibrate(50);
     }
 
-    displayHistory();
+    function increment(t) { 
+        if(sessionActive) { 
+            counts[t]++; 
+            document.getElementById(t==='edge'?'edgeVal':'prosVal').innerText = counts[t]; 
+            if ("vibrate" in navigator) navigator.vibrate(10);
+        }
+    }
 </script>
 </body>
 </html>
