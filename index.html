@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Protocol v8.6</title>
+    
+    <link rel="manifest" href="data:application/manifest+json,{'name':'Protocol','short_name':'Protocol','start_url':'.','display':'standalone','background_color':'#000000','theme_color':'#000000'}">
+
+    <style>
+        :root { --accent: #00e5ff; --bg: #000; --text: #e0e0e0; --dim: #0a0a0a; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; text-align: center; margin: 0; }
+        body.stealth { --accent: #050505; --text: #080808; --dim: #010101; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 450px; margin: 15px auto; }
+        .slot { background: var(--dim); padding: 12px; border-radius: 18px; border: 1px solid #111; display: flex; flex-direction: column; min-height: 90px; }
+        .label { font-size: 0.5rem; color: #444; text-transform: uppercase; letter-spacing: 1.5px; }
+        .res-box { font-size: 1.3rem; font-weight: 900; color: var(--accent); margin-top: 5px; }
+        #timer-display { font-size: 16vw; font-family: monospace; margin: 10px 0; color: #ffcc00; }
+        .roll-btn { background: #2979ff; color: #fff; border: none; padding: 20px; border-radius: 14px; width: 100%; font-size: 1.1rem; font-weight: bold; }
+        .stealth-toggle { position: fixed; top: 10px; right: 10px; background: #111; color: #444; border: 1px solid #222; padding: 8px; border-radius: 12px; font-size: 0.6rem; }
+        .history-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr; padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.7rem; color: #666; }
+        .done-btn { background: #00c853; color: white; border: none; padding: 18px; border-radius: 14px; width: 100%; display: none; margin-top: 10px; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <button class="stealth-toggle" onclick="toggleStealth()">GHOST</button>
+    <div class="grid">
+        <div class="slot"><div class="label">Edges</div><div id="res1" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Method</div><div id="res2" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Outcome</div><div id="res4" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Penalty</div><div id="resPOT" class="res-box">—</div></div>
+        <div class="slot" style="grid-column: span 2;"><div class="label">Fast Until</div><div id="res5" class="res-box">— DAYS</div></div>
+    </div>
+    <button class="roll-btn" onclick="startSession()">GENERATE</button>
+    <div id="timer-display">00:00</div>
+    <button class="done-btn" id="doneBtn" onclick="finishSession()">FINISH</button>
+    <div id="history-log" style="margin-top:20px; text-align:left; max-width:450px; margin-inline:auto;"></div>
+
+<script>
+    let timerInterval, timeLeft;
+    function vibrate(p) { if ("vibrate" in navigator) navigator.vibrate(p); }
+    function toggleStealth() { document.body.classList.toggle('stealth'); vibrate(10); }
+
+    function startSession() {
+        clearInterval(timerInterval);
+        const roll = Math.random() * 100;
+        if (roll < 17.5) {
+            vibrate([100, 50, 100]);
+            document.getElementById('res2').innerText = "DENIED";
+            document.getElementById('res5').innerText = Math.floor(Math.random() * 4) + 1;
+        } else {
+            vibrate(40);
+            const edges = Math.floor(Math.random() * 30) + 1;
+            document.getElementById('res1').innerText = edges;
+            document.getElementById('res2').innerText = "Just Hand";
+            document.getElementById('res4').innerText = Math.random() < 0.6 ? "To Cum" : "Not To Cum";
+            document.getElementById('res5').innerText = Math.floor(Math.random() * 30) + 1;
+            timeLeft = 1800; // 30 min default
+            document.getElementById('doneBtn').style.display = "block";
+            timerInterval = setInterval(() => { timeLeft--; updateTimer(); }, 1000);
+        }
+    }
+
+    function updateTimer() {
+        const m = Math.floor(timeLeft/60), s = timeLeft%60;
+        document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function finishSession() {
+        vibrate(50); clearInterval(timerInterval);
+        document.getElementById('doneBtn').style.display = "none";
+    }
+</script>
+</body>
+</html>
