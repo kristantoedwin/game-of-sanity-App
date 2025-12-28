@@ -2,151 +2,203 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wellness Tracker | Personal Health Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Protocol v8.5 Dev</title>
     <style>
-        :root {
-            --primary: #6366f1;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
+        :root { --accent: #00e5ff; --bg: #000; --text: #e0e0e0; --dim: #0a0a0a; }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: var(--bg); color: var(--text); 
+            padding: 15px; text-align: center; margin: 0;
+            transition: all 0.3s ease;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
+        
+        /* Branding Header */
         header {
-            width: 100%;
-            background: var(--card);
-            padding: 1rem 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        .logo {
-            font-weight: 800;
-            font-size: 1.25rem;
-            color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .container {
-            width: 90%;
-            max-width: 500px;
-            margin-top: 2rem;
-        }
-
-        .card {
-            background: var(--card);
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1rem;
-            transition: opacity 0.2s;
-        }
-
-        .btn:hover { opacity: 0.9; }
-
-        .log-item {
-            background: #f1f5f9;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+        .logo-box {
+            width: 30px; height: 30px;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-weight: 900;
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
         }
+        .brand-text { font-size: 0.8rem; letter-spacing: 3px; font-weight: bold; }
 
-        .stats {
-            margin-top: 20px;
-            font-weight: bold;
-            color: var(--primary);
+        body.stealth { --accent: #050505; --text: #080808; --dim: #010101; }
+        body.stealth .history-row { border-bottom: 1px solid #020202; }
+        body.stealth .logo-box { border-color: #050505; color: #050505; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 450px; margin: 15px auto; }
+        .slot { 
+            background: var(--dim); padding: 12px; border-radius: 18px; 
+            border: 1px solid #111; display: flex; flex-direction: column; min-height: 90px;
         }
+        .label { font-size: 0.5rem; color: #444; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+        .res-box { font-size: 1.3rem; font-weight: 900; color: var(--accent); }
+        
+        #timer-display { font-size: 16vw; font-family: monospace; margin: 10px 0; color: #ffcc00; }
+        
+        .roll-btn { 
+            background: #2979ff; color: #fff; border: none; padding: 18px; 
+            border-radius: 14px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer;
+        }
+        .stealth-toggle {
+            position: fixed; top: 10px; right: 10px; background: #111; color: #444;
+            border: 1px solid #222; padding: 8px; border-radius: 12px; font-size: 0.6rem; z-index: 100;
+        }
+        .done-btn { background: #00c853; color: white; border: none; padding: 18px; border-radius: 14px; width: 100%; display: none; margin-top: 10px; font-weight: bold; cursor: pointer;}
+
+        .history-container { margin-top: 30px; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto; }
+        .history-title { font-size: 0.6rem; color: #333; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: flex; justify-content: space-between;}
+        .history-row { 
+            display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr; 
+            padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.7rem; color: #666;
+        }
+        .history-row.header { color: #333; font-weight: bold; border-bottom: 2px solid #111; }
     </style>
 </head>
 <body>
 
+    <button class="stealth-toggle" onclick="toggleStealth()">GHOST MODE</button>
+
     <header>
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            WellnessLog
-        </div>
+        <div class="logo-box">P</div>
+        <div class="brand-text">PROTOCOL v8.5</div>
     </header>
 
-    <div class="container">
-        <div class="card">
-            <h2>Personal Session Tracker</h2>
-            <p>Privacy-focused tracking for your personal wellness routine.</p>
-            
-            <button class="btn" onclick="addSession()">Log New Session</button>
-
-            <div class="stats" id="counter">Total Sessions: 0</div>
-            
-            <div id="history" style="margin-top: 20px; text-align: left;">
-                <h4 style="margin-bottom: 10px;">Recent History</h4>
-                </div>
+    <div class="grid">
+        <div class="slot"><div class="label">Edges</div><div id="res1" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Method</div><div id="res2" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Outcome</div><div id="res4" class="res-box">—</div></div>
+        <div class="slot"><div class="label">Penalty</div><div id="resPOT" class="res-box">—</div></div>
+        <div class="slot" style="grid-column: span 2;">
+            <div class="label">Fast Until</div>
+            <div id="res5" class="res-box">— DAYS</div>
         </div>
     </div>
 
-    <script>
-        let sessions = JSON.parse(localStorage.getItem('wellness_logs')) || [];
+    <button class="roll-btn" id="startBtn" onclick="startSession()">GENERATE</button>
+    <div id="timer-display">00:00</div>
+    <button class="done-btn" id="doneBtn" onclick="finishSession()">REPORT FINISH</button>
+    
+    <div id="status-msg" style="margin-top: 10px; font-size: 0.8rem; color: #555;"></div>
 
-        function updateUI() {
-            const historyDiv = document.getElementById('history');
-            const counter = document.getElementById('counter');
-            
-            // Update Counter
-            counter.innerText = `Total Sessions: ${sessions.length}`;
+    <div class="history-container">
+        <div class="history-title">
+            <span>Recent Sessions</span>
+            <span onclick="clearHistory()" style="cursor:pointer; color: #ff1744;">Clear</span>
+        </div>
+        <div class="history-row header">
+            <div>Method</div><div>Result</div><div>Edges</div><div>Days</div>
+        </div>
+        <div id="history-log"></div>
+    </div>
 
-            // Update List
-            const listHTML = sessions.slice(-5).reverse().map(s => `
-                <div class="log-item">
-                    <span>${new Date(s.date).toLocaleDateString()}</span>
-                    <span>${new Date(s.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-            `).join('');
-            
-            historyDiv.innerHTML = '<h4 style="margin-bottom: 10px;">Recent History</h4>' + 
-                                 (listHTML || '<p style="color:#94a3b8; font-size:0.8rem;">No sessions logged yet.</p>');
+<script>
+    let timerInterval, timeLeft;
+
+    function vibrate(p) { if ("vibrate" in navigator) navigator.vibrate(p); }
+    function toggleStealth() { document.body.classList.toggle('stealth'); vibrate(10); }
+
+    function updateHistory(method, outcome, edges, days) {
+        let history = JSON.parse(localStorage.getItem('proto_history') || '[]');
+        history.unshift({ method, outcome, edges, days });
+        if (history.length > 5) history.pop();
+        localStorage.setItem('proto_history', JSON.stringify(history));
+        displayHistory();
+    }
+
+    function displayHistory() {
+        const log = document.getElementById('history-log');
+        const history = JSON.parse(localStorage.getItem('proto_history') || '[]');
+        log.innerHTML = history.map(h => `
+            <div class="history-row">
+                <div>${h.method}</div>
+                <div style="color: ${h.outcome.includes('Cum') ? '#00e5ff' : '#ff1744'}">${h.outcome}</div>
+                <div>${h.edges}</div>
+                <div>${h.days}d</div>
+            </div>
+        `).join('');
+    }
+
+    function clearHistory() { if(confirm("Clear log?")) { localStorage.removeItem('proto_history'); displayHistory(); } }
+
+    function startSession() {
+        clearInterval(timerInterval);
+        const roll = Math.random() * 100;
+        
+        if (roll < 17.5) {
+            vibrate([100, 50, 100]);
+            const d = Math.floor(Math.random() * 4) + 1;
+            document.getElementById('res2').innerText = "DENIED";
+            document.getElementById('res5').innerText = d;
+            document.getElementById('res1').innerText = "0";
+            document.getElementById('res4').innerText = "LOCKOUT";
+            document.getElementById('resPOT').innerText = "---";
+            updateHistory("DENIED", "LOCKOUT", 0, d);
+        } else {
+            vibrate(40);
+            handleAllowed();
         }
+    }
 
-        function addSession() {
-            const newSession = {
-                id: Date.now(),
-                date: new Date().toISOString()
-            };
-            sessions.push(newSession);
-            localStorage.setItem('wellness_logs', JSON.stringify(sessions));
-            updateUI();
-        }
+    function handleAllowed() {
+        const mSub = Math.random() * 100;
+        let method = "Just Hand";
+        if (mSub < 16) method = "Numbing";
+        else if (mSub < 25) method = "Prostate";
 
-        // Initialize UI on load
-        updateUI();
-    </script>
+        const edges = Math.floor(Math.random() * (method === "Numbing" ? 3 : 30)) + 1;
+        const outcome = Math.random() < 0.6 ? "To Cum" : "Not To Cum";
+        const days = Math.floor(Math.random() * 30) + 1;
+
+        document.getElementById('res1').innerText = edges;
+        document.getElementById('res2').innerText = method;
+        document.getElementById('res4').innerText = outcome;
+        document.getElementById('res5').innerText = days;
+
+        const potEl = document.getElementById('resPOT');
+        if (outcome === "To Cum") {
+            const eRoll = Math.random() * 100;
+            if (eRoll < 15 && method !== "Numbing") potEl.innerText = "PUNISH";
+            else if (eRoll < 80) potEl.innerText = (Math.floor(Math.random() * 26) + 5) + " STK";
+            else potEl.innerText = "MERCY";
+        } else { potEl.innerText = "NONE"; }
+
+        updateHistory(method, outcome, edges, days);
+
+        timeLeft = Math.floor(Math.random() * 2700) + 2700;
+        document.getElementById('doneBtn').style.display = "block";
+        updateTimer();
+        timerInterval = setInterval(() => {
+            timeLeft--; updateTimer();
+            if (timeLeft <= 0) { vibrate([800, 400, 800]); clearInterval(timerInterval); }
+        }, 1000);
+    }
+
+    function updateTimer() {
+        const m = Math.floor(timeLeft/60), s = timeLeft%60;
+        document.getElementById('timer-display').innerText = `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function finishSession() {
+        vibrate(50);
+        clearInterval(timerInterval);
+        document.getElementById('doneBtn').style.display = "none";
+        document.getElementById('status-msg').innerText = "SESSION COMPLETE";
+    }
+
+    displayHistory();
+</script>
 </body>
 </html>
